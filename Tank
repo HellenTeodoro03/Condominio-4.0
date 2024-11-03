@@ -1,0 +1,49 @@
+
+public class Tank extends Sensors {
+
+    private int level_low;
+    private int level_medium;
+    private int level_high;
+    private int water_flow;
+
+    public int getCode_dashboard() {
+        return level_low + level_medium + level_high + water_flow;
+    }
+
+    public void setLevel_low() { level_low = getSensor1(); }
+    public void setLevel_medium() { level_medium = getSensor2(); }
+    public void setLevel_high() { level_high = getSensor3(); }
+    public void setWater_flow() { water_flow = getWater_pipe(); }
+
+    @Override
+    public String getStatusMessage() {
+        int codeStatus = level_low + level_medium + level_high + water_flow;
+
+        switch (codeStatus) {
+            case 4:
+                System.err.println("Tanque status: Caixa d'água com 100% e recebendo água da rua");
+            case 3:
+                System.err.println("Tanque status: Caixa d'água com 50%, recebendo água da rua");
+            case 2:
+                System.err.println("Tanque status: Atenção! Caixa d'água 10%, mas recebendo Ã¡gua da rua");
+            case 1:
+                System.err.println("Tanque status: ALERTA! Caixa d'água vazia, mas recebendo 'água da rua!");
+            case 0:
+                System.err.println("Tanque status: EMERGÊNCIA! Caixa d'água vazia, sem água da rua!");
+            default:
+               return "Tanque status:Erro nos sensores, verificar!";
+        }
+    }
+
+    public void waterFlow() {
+        System.out.println(getStatusMessage());
+    }
+
+    public void startTank() {
+        setLevel_low();
+        setLevel_medium();
+        setLevel_high();
+        setWater_flow();
+        waterFlow();
+    }
+}
