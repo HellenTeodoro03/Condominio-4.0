@@ -1,0 +1,40 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class App {
+    public static void main(String[] args) {
+        System.out.println("Condominio 4.0");
+
+      
+        List<Sensors> sensorsList = new ArrayList<>();
+        
+        Tank tank = new Tank();
+        Pumps pumps = new Pumps();
+        
+        
+        sensorsList.add(tank);
+        sensorsList.add(pumps);
+
+        // Exibindo informações dos sensores e bombas
+        for (Sensors sensor : sensorsList) {
+            if (sensor instanceof Tank) {
+                Tank tankSensor = (Tank) sensor;
+                tankSensor.startTank(); 
+                System.out.println("Sensor: " + tankSensor.getSensor1());
+                System.out.println("Sensor: " + tankSensor.getSensor2());
+                System.out.println("Sensor: " + tankSensor.getSensor3());
+            } else if (sensor instanceof Pumps) {
+                Pumps pumpsSensor = (Pumps) sensor;
+                pumpsSensor.startPumps(); 
+                System.out.println("Status das Bombas: " + pumpsSensor.getStatusMessage());
+                System.out.println("Bomba 1: " + pumpsSensor.getPump1());
+                System.out.println("Bomba 2: " + pumpsSensor.getPump2());
+            }
+        
+    }
+    }
+}
+
+
+
+
