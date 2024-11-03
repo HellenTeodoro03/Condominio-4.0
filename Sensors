@@ -26,6 +26,6 @@ public abstract class Sensors {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    // Método abstrato que as subclasses precisam implementar
+   
     public abstract String getStatusMessage();
 }
