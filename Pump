@@ -1,98 +1,124 @@
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class Pumps extends Sensors {
+public class Pump extends Sensors {
 
     private int water_pump1;
     private int water_pump2;
 
     private LocalDateTime startTimePump1;
     private LocalDateTime endTimePump1;
-    private long Pump1TotalWorkedTime;
+    private long Pump1TotalOffTime;
 
     private LocalDateTime startTimePump2;
     private LocalDateTime endTimePump2;
-    private long Pump2TotalWorkedTime;
+    private long Pump2TotalOffTime;
 
+    public DatabaseHelper dbHelper = new DatabaseHelper(); 
+
+    //  Bomba 1
     public void setWater_pump1() {
-        water_pump1 = getPump1();
-        pump1WorkTime();
+        try {
+            water_pump1 = getPump1();
+            if (water_pump1 == 0) { 
+                pump1OffTime();
+            } else {
+                System.out.println("Bomba 1 está ligada. Nenhuma ação para desligamento necessária.");
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao configurar a bomba 1: " + e.getMessage());
+        }
     }
 
+    // Bomba 2
     public void setWater_pump2() {
-        water_pump2 = getPump2();
-        pump2WorkTime();
-    }
-
-    public void pump1WorkTime() {
-
-         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-
-
-        if (water_pump1 == 1) {
-            startTimePump1 = LocalDateTime.now();
-            System.out.println("Bomba 1 ligada em: " + startTimePump1.format(formatter));
-        } else {
-            endTimePump1 = LocalDateTime.now();
-            System.out.println("Bomba 1 desligada em: " + endTimePump1.format(formatter));
-            calculateOperatingPump1Time();
+        try {
+            water_pump2 = getPump2();
+            if (water_pump2 == 0) { 
+                pump2OffTime();
+            } else {
+                System.out.println("Bomba 2 está ligada. Nenhuma ação para desligamento necessária.");
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao configurar a bomba 2: " + e.getMessage());
         }
     }
 
-    public void pump2WorkTime() {
-
+    // Calcula o tempo de desligamento da bomba 1
+    public void pump1OffTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        try {
+            startTimePump1 = LocalDateTime.now();
+            System.out.println("Bomba 1 desligada em: " + startTimePump1.format(formatter));
 
+            // SIMULA o tempo desligado de 1 minuto
+            Thread.sleep(60000); 
+            endTimePump1 = LocalDateTime.now();
+            System.out.println("Bomba 1 permaneceu desligada até: " + endTimePump1.format(formatter));
 
-       if (water_pump2 == 1) {
-           startTimePump2 = LocalDateTime.now();
-           System.out.println("Bomba 2 ligada em: " + startTimePump2.format(formatter));
-       } else {
-           endTimePump2 = LocalDateTime.now();
-           System.out.println("Bomba 2 desligada em: " + endTimePump2.format(formatter));
-           calculateOperatingPump2Time();
-       }
-   }
-
-    private long calculateOperatingPump1Time() {
-        if (startTimePump1 != null && endTimePump1 != null) {
-            Duration duration = Duration.between(startTimePump1, endTimePump1);
-            long minutes = duration.toMinutes();
-            Pump1TotalWorkedTime += minutes;
-            System.out.println("Tempo total acumulado de Bomba 1: " + Pump1TotalWorkedTime + " minutos.");
-            return Pump1TotalWorkedTime;
+            calculateOffTimePump1(); 
+            dbHelper.savePumpOperation(1, startTimePump1, endTimePump1, 0, Pump1TotalOffTime);
+        } catch (Exception e) {
+            System.err.println("Erro durante o cálculo de tempo desligado da bomba 1: " + e.getMessage());
         }
-        return Pump1TotalWorkedTime;
     }
 
-    private long calculateOperatingPump2Time() {
-        if (startTimePump2 != null && endTimePump2 != null) {
-            Duration duration = Duration.between(startTimePump2, endTimePump2);
-            long minutes = duration.toMinutes();
-            Pump2TotalWorkedTime += minutes;
-            System.out.println("Tempo total acumulado de Bomba 2: " + Pump2TotalWorkedTime + " minutos.");
-            return Pump2TotalWorkedTime;
+    // Calcula o tempo de desligamento da bomba 2
+    public void pump2OffTime() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        try {
+            startTimePump2 = LocalDateTime.now();
+            System.out.println("Bomba 2 desligada em: " + startTimePump2.format(formatter));
+
+            // SIMULA o tempo desligado de 1 minuto
+            Thread.sleep(60000); 
+            endTimePump2 = LocalDateTime.now();
+            System.out.println("Bomba 2 permaneceu desligada até: " + endTimePump2.format(formatter));
+
+            calculateOffTimePump2(); 
+            dbHelper.savePumpOperation(2, startTimePump2, endTimePump2, 0, Pump2TotalOffTime); // Salvar no banco de dados
+        } catch (Exception e) {
+            System.err.println("Erro durante o cálculo de tempo desligado da bomba 2: " + e.getMessage());
         }
-        return Pump2TotalWorkedTime;
     }
 
-    @Override
-    public String getStatusMessage() {
-        return String.format("Status das Bombas: Bomba 1 - %s | Bomba 2 - %s",
-                water_pump1 == 1 ? "Ligada" : "Desligada",
-                water_pump2 == 1 ? "Ligada" : "Desligada");
+    // Calcula o tempo TOTAL de desligamento da bomba 1
+    long calculateOffTimePump1() {
+        try {
+            if (startTimePump1 != null && endTimePump1 != null) {
+                Duration duration = Duration.between(startTimePump1, endTimePump1);
+                long minutes = duration.toMinutes();
+                Pump1TotalOffTime += minutes;
+                System.out.println("Tempo total desligada da Bomba 1: " + Pump1TotalOffTime + " minutos.");
+                return Pump1TotalOffTime; 
+            } else {
+                System.out.println("Não foi possível calcular o tempo de desligamento para a Bomba 1.");
+                return Pump1TotalOffTime;
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao calcular o tempo de desligamento da bomba 1: " + e.getMessage());
+            return Pump1TotalOffTime;
+        }
     }
 
-    public void startPumps() {
-        setWater_pump1();
-        setWater_pump2();
-        System.out.println(getStatusMessage());
-        throw new UnsupportedOperationException("Not supported yet.");
+    // Calcula o tempo TOTAL de desligamento da bomba 2
+    long calculateOffTimePump2() {
+        try {
+            if (startTimePump2 != null && endTimePump2 != null) {
+                Duration duration = Duration.between(startTimePump2, endTimePump2);
+                long minutes = duration.toMinutes();
+                Pump2TotalOffTime += minutes;
+                System.out.println("Tempo total desligada da Bomba 2: " + Pump2TotalOffTime + " minutos.");
+                return Pump2TotalOffTime;
+            } else {
+                System.out.println("Não foi possível calcular o tempo de desligamento para a Bomba 2.");
+                return Pump2TotalOffTime;
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao calcular o tempo de desligamento da bomba 2: " + e.getMessage());
+            return Pump2TotalOffTime;
+        }
     }
 
-    
-      
-    
 }
